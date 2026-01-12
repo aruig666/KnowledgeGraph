@@ -73,8 +73,8 @@ if __name__ == "__main__":
     init = True
     driver = connect_neo4j(init=init)
 
-    file_dir = Path(r"E:\dataset\cam\251225test\process_graph")
-    file_stem = "3DA2607A"
+    file_dir = Path(r"E:\dataset\cam\260108test\process_graph")
+    file_stem = "cs1"
 
     candidate_suffixes = [".pdf", ".stp", ".prt"]
     file_infos = []

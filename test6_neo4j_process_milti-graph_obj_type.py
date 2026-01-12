@@ -20,17 +20,20 @@ def _insert_face(tx, file_id: str, face_index: str, face_payload: dict) -> str:
     hash_value = generate_object_hash_id(**props)
     props["__hash__"] = hash_value
     identifier = f"Surface_{hash_value}"
-    type_name = props.get("face_type")
+
+    type_idx = props.get("face_type")
+    type_name = props.get("face_type_name")
     tx.run(
         """
         MATCH (f:File {Hash: $file_id})
-        MERGE (st:SurfaceType {name: $type_name})
+        MERGE (st:SurfaceType {name: $type_name, index: $type_idx})
         MERGE (s:Surface {__id__:$identifier, __fileId__:$file_id})
         SET s += $props
         MERGE (f)-[:HAS_SURFACE]->(s)
-        MERGE (s)-[:OF_TYPE]->(st)
+        MERGE (s)-[:OF_SURFACE_TYPE]->(st)
         """,
         file_id=file_id,
+        type_idx=type_idx,
         type_name=type_name,
         part_id=file_id,
         identifier=identifier,
@@ -50,18 +53,20 @@ def _insert_curve(tx, file_id: str, curve_key: str, curve_payload: dict) -> str:
     hash_value = generate_object_hash_id(**props)
     props["__hash__"] = hash_value
     identifier= f"Curve_{hash_value}"
-    type_name = props.get("edge_type")
+    type_idx= props.get("curve_type")
+    type_name = props.get("curve_type_name")
 
     tx.run(
         """
         MATCH (f:File {Hash: $file_id})
-        MERGE (ct:CurveType {name: $type_name})
+        MERGE (ct:CurveType {name: $type_name, index: $type_idx})
         MERGE (c:Curve {__id__: $identifier, __fileId__: $file_id})
         SET c += $props
         MERGE (f)-[:HAS_CURVE]->(c)
-        MERGE (c)-[:OF_TYPE]->(ct)
+        MERGE (c)-[:OF_CURVE_TYPE]->(ct)
         """,
         file_id=file_id,
+        type_idx=type_idx,
         type_name=type_name,
         identifier=identifier,
         props=props,
@@ -80,34 +85,6 @@ def _link_curve_surface(tx, file_id: str, curve_id: str, surface_id: str) -> Non
         curve_id=curve_id,
         surface_id=surface_id,
     )
-
-
-def _insert_feature(tx, file_id: str, feature: MachiningFeature) -> str:
-
-    props = {
-        "__featureIndex__": feature.index,
-        "__fileId__": file_id,
-    }
-    hash_value = generate_object_hash_id(**props)
-    props["__index__"] = hash_value
-    identifier = f"MachiningFeature_{hash_value}"
-    if feature.surfaces:
-        props["SurfaceKeys"] = sorted(feature.surfaces)
-    if feature.neighbors:
-        props["NeighborIndices"] = sorted(feature.neighbors)
-
-    tx.run(
-        """
-        MATCH (part_node:Part {PartId: $part_id})
-        MERGE (feature:MachiningFeature {Id: $identifier})
-        SET feature += $props
-        """,
-        part_id=file_id,
-        identifier=identifier,
-        props=props,
-    )
-    return identifier
-
 
 
 def _insert_machining_features(tx, file_id: str, feature, feature_index) -> str:
@@ -130,7 +107,7 @@ def _insert_machining_features(tx, file_id: str, feature, feature_index) -> str:
         MERGE (mft:MachiningFeatureType {name: $type_name})
         MERGE (mf:MachiningFeature {__id__: $identifier, __fileId__: $file_id})
         SET mf += $props
-        MERGE (mf)-[:OF_TYPE]->(mft)
+        MERGE (mf)-[:OF_FEATURE_TYPE]->(mft)
         """,
         file_id=file_id,
         type_name=type_name,
@@ -183,7 +160,7 @@ def _insert_process(tx, file_id: str, process) -> str:
         MERGE (pt:ProcessUnitType {name: $type_name})
         MERGE (p:ProcessUnit {__id__: $identifier, __fileId__: $file_id})
         SET p += $props
-        MERGE (p)-[:OF_TYPE]->(pt)
+        MERGE (p)-[:OF_PROCESS_UNIT_TYPE]->(pt)
         """,
         file_id=file_id,
         type_name=type_name,
@@ -212,8 +189,8 @@ def _link_process_adjacent(tx, file_id: str, left_id: str, right_id: str) -> Non
 def _link_feature_process(tx, file_id: str, feature_id: str, process_id: str) -> None:
     tx.run(
         """
-        MATCH (feature:MachiningFeature {Id: $feature_id, PartId: $file_id})
-        MATCH (process:ProcessUnit {Id: $process_id, PartId: $file_id})
+        MATCH (feature:MachiningFeature {__id__: $feature_id, __fileId__: $file_id})
+        MATCH (process:ProcessUnit {__id__: $process_id, __fileId__: $file_id})
         MERGE (feature)-[:ASSIGNED_TO_PROCESS]->(process)
         """,
         file_id=file_id,
@@ -242,11 +219,13 @@ if __name__ == "__main__":
     driver = connect_neo4j(init=init)
     # _ensure_unique_constraints(driver)
 
-    hashfile=r"E:\dataset\cam\251225test\process_graph\3DA2607A.stp"
+    hashfile=r"E:\dataset\cam\260108test\process_graph\cs1.stp"
     hash_value = file_hash(hashfile)
 
+    prtfile=r"E:\dataset\cam\260108test\process_graph\cs1.prt"
+    prt_file_id = file_hash(prtfile)
 
-    json_file = pathlib.Path(r"E:\dataset\cam\251225test\mynet_multi_kg\3DA2607A.json")
+    json_file = pathlib.Path(r"E:\dataset\cam\260108test\mynet_multi_kgv2\cs1.json")
     para_dict = 0
     with open(json_file, 'r',encoding='utf-8') as file:
         para_dict = json.load(file)
@@ -415,8 +394,6 @@ if __name__ == "__main__":
             if feature_id and process_id:
                 session.execute_write(_link_feature_process, file_id, feature_id, process_id)
 
-        prtfile=r"E:\dataset\cam\251225test\process_graph\3DA2607A.prt"
-        prt_file_id = file_hash(prtfile)
 
 
         for process_id, operation_names in process_operation_map.items():

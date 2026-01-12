@@ -50,7 +50,7 @@ def _upsert_operation(tx, file_id: str, operation: dict) -> str:
         }}
         )
         SET op += $props
-        MERGE (op)-[:OF_TYPE]->(t)
+        MERGE (op)-[:OF_OPERATION_TYPE]->(t)
         """,
         file_id=file_id,
         type_name=type_name,
@@ -78,8 +78,8 @@ def _upsert_tool(tx, file_id: str, tool: dict) -> str:
             __fileId__: $file_id
         }}
         )
-        MERGE (ts)-[:OF_TYPE]->(t)
-        MERGE (tool)-[:OF_TYPE]->(ts)
+        MERGE (ts)-[:OF_TOOL_TYPE]->(t)
+        MERGE (tool)-[:OF_SUB_TOOL_TYPE]->(ts)
         SET tool += $props
         """,
         file_id=file_id,
@@ -131,7 +131,7 @@ def _upsert_feature_geometry(tx, file_id: str, feature: dict) -> str:
             __fileId__: $file_id
             }}
         )
-        MERGE (g)-[:OF_TYPE]->(gt)
+        MERGE (g)-[:OF_GEOMETRY_TYPE]->(gt)
         SET g += $props
         """,
         type_name=type_name,
@@ -167,7 +167,7 @@ def _upsert_orient_geometry(tx, part_id: str, orient: dict) -> str:
         f"""
         MERGE (gt:GeometryType {{name: $type_name}})
         MERGE (o:Geometry {{__id__: $identifier, __fileId__: $file_id}})
-        MERGE (o)-[:OF_TYPE]->(gt)
+        MERGE (o)-[:OF_GEOMETRY_TYPE]->(gt)
         SET o += $props
         """,
         type_name=type_name,
@@ -240,11 +240,11 @@ if __name__ == "__main__":
     init = False
     driver = connect_neo4j(init=init)
     # _ensure_unique_constraints(driver)
-    hashfile = pathlib.Path(r"E:\dataset\cam\251225test\process_graph\3DA2607A.prt")
+    hashfile = pathlib.Path(r"E:\dataset\cam\260108test\process_graph\cs1.prt")
     hash_value = file_hash(str(hashfile))
     print(f"File hash for {hashfile}: {hash_value}")
 
-    json_file = pathlib.Path(r"E:\dataset\cam\251225test\prt_kg_json\3DA2607A.json")
+    json_file = pathlib.Path(r"E:\dataset\cam\260108test\prt_kg_json\cs1.json")
     para_dict = 0
     with open(json_file, 'r',encoding='utf-8') as file:
         para_dict = json.load(file)
