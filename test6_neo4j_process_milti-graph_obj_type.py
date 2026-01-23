@@ -324,6 +324,8 @@ if __name__ == "__main__":
             "2": 2,
         '''
         for src_feature,tar_fe in machining_feature_edges:
+            if src_feature == tar_fe:
+                continue
             session.execute_write(_link_adjacent_features, file_id, mf_idx_map[src_feature], mf_idx_map[tar_fe])
 
         for surface_key, feature_idx in surface_feature_map.items():
@@ -372,6 +374,8 @@ if __name__ == "__main__":
             left_id = process_index_map.get(left_idx)
             right_id = process_index_map.get(right_idx)
             if left_id and right_id:
+                if left_id == right_id:
+                    continue
                 session.execute_write(_link_process_adjacent, file_id, left_id, right_id)
 
         raw_feature_process_map = para_dict.get('feature_process', {})
