@@ -3,6 +3,8 @@ import pathlib
 from secrets import token_hex
 from typing import Dict
 
+from dotenv import load_dotenv
+
 from entity.feature import MachiningFeature
 from entity.part import Part
 from entity.process import Process
@@ -214,18 +216,23 @@ def _link_process_operation(tx, file_id: str,prt_file_id: str, process_idx: str,
 
 if __name__ == "__main__":
 
+    load_dotenv()
+
     init = False
     # init = True
     driver = connect_neo4j(init=init)
     # _ensure_unique_constraints(driver)
+    # file_dir = Path(r"E:\dataset\cam\251225test\process_graph")
+    # file_stem = "3DA2607A"
 
-    hashfile=r"E:\dataset\cam\260108test\process_graph\cs1.stp"
+
+    hashfile=r"E:\dataset\cam\251225test\process_graph\3DA2607A.stp"
     hash_value = file_hash(hashfile)
 
-    prtfile=r"E:\dataset\cam\260108test\process_graph\cs1.prt"
+    prtfile=r"E:\dataset\cam\251225test\process_graph\3DA2607A.prt"
     prt_file_id = file_hash(prtfile)
 
-    json_file = pathlib.Path(r"E:\dataset\cam\260108test\mynet_multi_kgv2\cs1.json")
+    json_file = pathlib.Path(r"E:\dataset\cam\251225test\mynet_multi_kgv2\3DA2607A.json")
     para_dict = 0
     with open(json_file, 'r',encoding='utf-8') as file:
         para_dict = json.load(file)

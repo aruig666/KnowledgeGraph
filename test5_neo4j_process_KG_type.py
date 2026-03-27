@@ -3,6 +3,8 @@ import json
 import pathlib
 from typing import List
 
+from dotenv import load_dotenv
+
 from utils.hash import generate_unique_id, file_hash,generate_object_hash_id
 from utils.neo4j import connect_neo4j
 from entity.part import Part
@@ -235,16 +237,18 @@ def _link_next_operation(tx, file_id: str, current_id: str, next_id: str) -> Non
 
 
 if __name__ == "__main__":
+    load_dotenv()
 
     # init = False
     init = False
     driver = connect_neo4j(init=init)
     # _ensure_unique_constraints(driver)
-    hashfile = pathlib.Path(r"E:\dataset\cam\260108test\process_graph\cs1.prt")
+
+    hashfile = pathlib.Path(r"E:\dataset\cam\251225test\process_graph\3DA2607A.prt")
     hash_value = file_hash(str(hashfile))
     print(f"File hash for {hashfile}: {hash_value}")
 
-    json_file = pathlib.Path(r"E:\dataset\cam\260108test\prt_kg_json\cs1.json")
+    json_file = pathlib.Path(r"E:\dataset\cam\251225test\prt_kg_json\3DA2607A.json")
     para_dict = 0
     with open(json_file, 'r',encoding='utf-8') as file:
         para_dict = json.load(file)

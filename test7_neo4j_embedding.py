@@ -4,6 +4,8 @@ import pathlib
 from collections.abc import Iterable
 from typing import Any, Dict, List, Tuple
 
+from dotenv import load_dotenv
+
 from utils.hash import file_hash
 from utils.neo4j import connect_neo4j
 
@@ -91,18 +93,19 @@ def _write_feature_embedding(
 
 
 if __name__ == "__main__":
+    load_dotenv()
 
     init = False
     driver = connect_neo4j(init=init)
 
-    hashfile = r"E:\dataset\cam\260108test\process_graph\cs1.stp"
+    hashfile = r"E:\dataset\cam\251225test\process_graph\3DA2607A.stp"
     hash_value = file_hash(hashfile)
 
-    json_file = pathlib.Path(r"E:\dataset\cam\260108test\embedding\cs1.json")
+    json_file = pathlib.Path(r"E:\dataset\cam\251225test\embedding\3DA2607A.json")
     with open(json_file, "r", encoding="utf-8") as file:
         payload = json.load(file)
 
-    pyg_json_file = pathlib.Path(r"E:\dataset\cam\260108test\mynet_multi_kgv2\cs1.json")
+    pyg_json_file = pathlib.Path(r"E:\dataset\cam\251225test\mynet_multi_kgv2\3DA2607A.json")
     with open(pyg_json_file, "r", encoding="utf-8") as file:
         pyg_payload = json.load(file)
 

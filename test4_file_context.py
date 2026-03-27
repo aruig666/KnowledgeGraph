@@ -3,6 +3,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Dict, Optional
 
+from dotenv import load_dotenv
+
 from utils.hash import file_hash
 from utils.neo4j import connect_neo4j
 
@@ -70,11 +72,14 @@ def _upsert_file_variant(tx, group_name: str, file_info: Dict[str, object]) -> N
 
 
 if __name__ == "__main__":
-    init = True
+    load_dotenv()
+    init = False
     driver = connect_neo4j(init=init)
 
     file_dir = Path(r"E:\dataset\cam\260108test\process_graph")
     file_stem = "cs1"
+    file_dir = Path(r"E:\dataset\cam\251225test\process_graph")
+    file_stem = "3DA2607A"
 
     candidate_suffixes = [".pdf", ".stp", ".prt"]
     file_infos = []

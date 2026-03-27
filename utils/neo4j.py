@@ -7,9 +7,12 @@ from neo4j import GraphDatabase
 def connect_neo4j(init=False):
     neo4j_username = os.environ.get("NEO4J_USER", "neo4j")
     neo4j_password = os.environ.get("NEO4J_PASSWORD")
+    neo4j_host = os.environ.get("NEO4J_HOST", "localhost")
+    print(f"{neo4j_host}  {neo4j_username}  {neo4j_password}")
 
     # 注意，这里的用户名为neo4j全局用户名，而非DBMS或者database的名称
-    driver = GraphDatabase.driver('neo4j://localhost:7687', auth=(neo4j_username, neo4j_password))
+    driver = GraphDatabase.driver(f'neo4j://{neo4j_host}:7687',
+                    auth=(neo4j_username, neo4j_password))
     if init == True:
         with driver.session() as session:
             session.run("MATCH (n) DETACH DELETE n")
